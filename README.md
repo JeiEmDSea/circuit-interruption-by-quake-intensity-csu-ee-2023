@@ -6,3 +6,7 @@ Specifically, the study aims to achieve the following:
 1. To develop a sensitivity curve.
 2. To test the device reliability and accuracy of the device.
   The system’s completion will demonstrate that utilizing microprocessor, sensors, and earthquake detection can interrupt circuit breakers.
+
+<p align="center">
+  <img src="schematic\diagram.png">
+</p>
