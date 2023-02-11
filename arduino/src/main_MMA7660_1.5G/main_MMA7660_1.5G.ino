@@ -8,29 +8,23 @@
 #define relay_pin 11
 #define buzzer_pin 12
 
-#define int5_G_force 0.115 // G
-#define int6_G_force 0.215 // G
-#define int7_G_force 0.401 // G
-#define int8_G_force 0.747 // G
-#define int9_G_force 1.39  // G
+// ? List of G forces
+float intensity[10] = {0, 0, 0, 0, 0, 0.115, 0.215, 0.401, 0.747, 1.39};
 
-unsigned int int5_time_limit = 10; // seconds
-unsigned int int6_time_limit = 7;  // seconds
-unsigned int int7_time_limit = 3;  // seconds
-unsigned int int8_time_limit = 1;  // seconds
+// ? Indicates how long the system waits before interrupting the circuit
+const unsigned int time_limit[10] = {0, 0, 0, 0, 0, 10, 7, 3, 1, 0.5};
 
-unsigned int int5_cooldown = 10; // seconds
-unsigned int int6_cooldown = 15; // seconds
-unsigned int int7_cooldown = 20; // seconds
-unsigned int int8_cooldown = 25; // seconds
+// ? Indicates how long the program rings the alarm and keep the circuit interrupted
+const unsigned int cooldown[10] = {0, 0, 0, 0, 0, 10, 15, 20, 25, 30};
 
-float maxRecordedAcceleration = 0; // G
+float maxRecordedAcceleration = 0.0F; // G
+int currentIntensity = 0;
 
 MMA7660 accelerometer;
-SimpleRelay relay = SimpleRelay(relay_pin, true);
+SimpleRelay relay = SimpleRelay(relay_pin, false);
 ezBuzzer buzzer(buzzer_pin);
 StopWatch timer(StopWatch::SECONDS);
-CountDown cooldown(CountDown::SECONDS);
+CountDown countdown(CountDown::SECONDS);
 
 void setup()
 {
@@ -56,64 +50,54 @@ void loop()
     delay(25);
     counter++;
   } while (counter < 10);
-  Serial.print(String(maxRecordedAcceleration, 3) + ",");
 
-  if (cooldown.isRunning())
+  getCurrentIntensity();
+
+  // ! Serial.print(String(maxRecordedAcceleration, 3));
+  Serial.print(currentIntensity);
+  Serial.print(",");
+
+  if (countdown.isRunning())
   {
-    Serial.println("1");
+    Serial.println("10");
     buzzer.beep(2000);
   }
   else
   {
-    if (maxRecordedAcceleration > int5_G_force && timer.isReset())
+    if (maxRecordedAcceleration > intensity[5] && timer.isReset())
     {
       timer.start();
+      buzzer.beep(2000);
       Serial.println("0");
     }
-    else if (maxRecordedAcceleration > int5_G_force && timer.isRunning())
+    else if (maxRecordedAcceleration > intensity[5] && timer.isRunning())
     {
-      if (intensityIsOverTimeLimit())
+      if (timer.elapsed() > time_limit[currentIntensity] && maxRecordedAcceleration >= intensity[currentIntensity])
       {
         timer.reset();
-        cooldown.start(getCooldownTime(maxRecordedAcceleration));
+        countdown.start(cooldown[currentIntensity]);
         maxRecordedAcceleration = 0;
         relay.off();
-        Serial.println("1");
+        Serial.println("10");
       }
       Serial.println("0");
     }
-    else if (maxRecordedAcceleration < int5_G_force && timer.isReset())
+    else if (maxRecordedAcceleration < intensity[5] && timer.isReset())
     {
-      Serial.println("-1");
+      Serial.println("-10");
+      currentIntensity = 0;
       relay.on();
     }
   }
 }
 
-unsigned int getCooldownTime(float val)
+void getCurrentIntensity()
 {
-  if (val >= int5_G_force && val < int6_G_force)
+  for (int i = 5; i <= 9; i++)
   {
-    return int5_cooldown;
+    if (maxRecordedAcceleration >= intensity[i])
+    {
+      currentIntensity = i;
+    }
   }
-  else if (val >= int6_G_force && val < int7_G_force)
-  {
-    return int6_cooldown;
-  }
-  else if (val >= int7_G_force && val < int8_G_force)
-  {
-    return int7_cooldown;
-  }
-  else if (val >= int8_G_force)
-  {
-    return int8_cooldown;
-  }
-}
-
-bool intensityIsOverTimeLimit()
-{
-  return timer.elapsed() > int8_time_limit && maxRecordedAcceleration >= int8_G_force
-    || timer.elapsed() > int7_time_limit && maxRecordedAcceleration >= int7_G_force
-    || timer.elapsed() > int6_time_limit && maxRecordedAcceleration >= int6_G_force
-    || timer.elapsed() > int5_time_limit && maxRecordedAcceleration >= int5_G_force;
 }
