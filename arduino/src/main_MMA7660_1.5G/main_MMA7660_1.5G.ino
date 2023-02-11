@@ -21,7 +21,7 @@ float maxRecordedAcceleration = 0.0F; // G
 int currentIntensity = 0;
 
 MMA7660 accelerometer;
-SimpleRelay relay = SimpleRelay(relay_pin, false);
+SimpleRelay relay = SimpleRelay(relay_pin, true);
 ezBuzzer buzzer(buzzer_pin);
 StopWatch timer(StopWatch::SECONDS);
 CountDown countdown(CountDown::SECONDS);
