@@ -1,0 +1,27 @@
+# Syntax Colouring CountDown
+
+# Data types (KEYWORD1)
+CountDown	KEYWORD1
+
+
+# Methods and Functions (KEYWORD2)
+setResolution	KEYWORD2
+resolution	KEYWORD2
+getUnits	KEYWORD2
+
+start	KEYWORD2
+stop	KEYWORD2
+cont	KEYWORD2
+
+remaining	KEYWORD2
+isRunning	KEYWORD2
+isStopped	KEYWORD2
+
+
+# Constants (LITERAL1)
+COUNTDOWN_LIB_VERSION	LITERAL1
+MILLIS	LITERAL1
+MICROS	LITERAL1
+SECONDS	LITERAL1
+MINUTES	LITERAL1
+
